@@ -101,11 +101,13 @@
 {
 	[self hideActivityIndicator];
 	
-	[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Request Error")
-								 message:error!=nil?[error localizedDescription]:SHKLocalizedString(@"There was an error while sharing")
-								delegate:nil
-					   cancelButtonTitle:SHKLocalizedString(@"Close")
-					   otherButtonTitles:nil] show];
+    if (!error.localizedDescription) {
+        NSMutableDictionary *userInfo = [[error userInfo] mutableCopy];
+        userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"There was an error while sharing");
+        error = [NSError errorWithDomain:error.domain code:error.code userInfo:userInfo];
+    }
+    
+    [self sendDidFailWithError:error];
 }
 
 
@@ -226,11 +228,13 @@
 {
 	[self hideActivityIndicator];
 	
-	[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Access Error")
-								 message:error!=nil?[error localizedDescription]:SHKLocalizedString(@"There was an error while sharing")
-								delegate:nil
-					   cancelButtonTitle:SHKLocalizedString(@"Close")
-					   otherButtonTitles:nil] show];
+    if (!error.localizedDescription) {
+        NSMutableDictionary *userInfo = [[error userInfo] mutableCopy];
+        userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"There was an error while sharing");
+        error = [NSError errorWithDomain:error.domain code:error.code userInfo:userInfo];
+    }
+    
+    [self sendDidFailWithError:error];
 }
 
 - (void)storeAccessToken

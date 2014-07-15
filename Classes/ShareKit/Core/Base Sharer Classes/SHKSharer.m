@@ -499,11 +499,8 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 	{
 		if (!self.quiet)
 		{
-			[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Offline")
-										 message:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])
-										delegate:nil
-							   cancelButtonTitle:SHKLocalizedString(@"Close")
-							   otherButtonTitles:nil] show];
+            NSError *error = [NSError errorWithDomain:@"com.sharekit.sharer" code:0 userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])}];
+            [self sendDidFailWithError:error];
 		}
 		return;
 	}
@@ -868,12 +865,8 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 	
 	else if (!self.quiet)
 	{
-		[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Offline")
-									 message:SHKLocalizedString(@"You must be online in order to share with %@", [self sharerTitle])
-									delegate:nil
-						   cancelButtonTitle:SHKLocalizedString(@"Close")
-						   otherButtonTitles:nil] show];
-		
+        NSError *error = [NSError errorWithDomain:@"com.sharekit.sharer" code:0 userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online in order to share with %@", [self sharerTitle])}];
+        [self sendDidFailWithError:error];
 		return YES;
 	}
 	

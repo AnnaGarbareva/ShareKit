@@ -46,6 +46,10 @@
 - (void) closeView
 {
     [[SHK currentHelper] hideCurrentViewControllerAnimated:YES];
+    SHKVkontakte *sharer = [self delegate];
+    if ([sharer.shareDelegate respondsToSelector:@selector(sharerAuthDidFinish:success:)]) {
+        [sharer.shareDelegate sharerAuthDidFinish:sharer success:NO];
+    }
 }
 
 - (void) addCloseButton
