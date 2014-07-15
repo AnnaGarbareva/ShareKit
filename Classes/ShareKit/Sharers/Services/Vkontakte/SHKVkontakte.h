@@ -28,14 +28,16 @@
 #import <Foundation/Foundation.h>
 #import "SHKSharer.h"
 
-static NSString *const kSHKVkonakteUserId=@"kSHKVkontakteUserId";
-static NSString *const kSHKVkontakteAccessTokenKey=@"kSHKVkontakteAccessToken";
-static NSString *const kSHKVkontakteExpiryDateKey=@"kSHKVkontakteExpiryDate";
-static NSString *const kSHKVkontakteAccessCodeKey=@"kSHKVkontakteAccessCode";
-static NSString *const kSHKVkonakteUserInfo=@"kSHKVkontakteUserInfo";
+static NSString *const kSHKVkonakteUserId = @"kSHKVkontakteUserId";
+static NSString *const kSHKVkontakteAccessTokenKey = @"kSHKVkontakteAccessToken";
+static NSString *const kSHKVkontakteExpiryDateKey = @"kSHKVkontakteExpiryDate";
+static NSString *const kSHKVkontakteAccessCodeKey = @"kSHKVkontakteAccessCode";
+static NSString *const kSHKVkonakteUserInfo = @"kSHKVkontakteUserInfo";
 
 @interface SHKVkontakte : SHKSharer
 
 - (void)authComplete;
 
 @end
+
+static NSString *const kSHKVkontakteErrorDomain = @"com.sharekit.vkontakte";

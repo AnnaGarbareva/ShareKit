@@ -147,7 +147,7 @@
 					&& NSOrderedDescending == [self.expirationDate compare:[NSDate date]]);
 }
 
-- (void)promptAuthorization
+- (void)authorizationFormShow
 {
 	SHKVkontakteOAuthView *rootView = [[SHKVkontakteOAuthView alloc] init];
 	rootView.appID = SHKCONFIG(vkontakteAppId);

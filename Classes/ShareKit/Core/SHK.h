@@ -143,3 +143,13 @@ NSString * SHKEncode(NSString * value);
 NSString * SHKEncodeURL(NSURL * value);
 NSString * SHKFlattenHTML(NSString * value, BOOL preserveLineBreaks);
 NSString * SHKLocalizedString(NSString* key, ...);
+
+
+/** Error codes and domains */
+
+const NSInteger SHKErrorCodeCancelled = 101;
+const NSInteger SHKErrorCodeAccessDenied = 102;
+const NSInteger SHKErrorCodeInvalidInput = 103;
+const NSInteger SHKErrorCodeUnknown = 105;
+
+static NSString * const SHKErrorDomain = @"com.sharekit";

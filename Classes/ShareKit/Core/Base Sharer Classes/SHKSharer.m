@@ -499,7 +499,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 	{
 		if (!self.quiet)
 		{
-            NSError *error = [NSError errorWithDomain:@"com.sharekit.sharer" code:0 userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])}];
+            NSError *error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])}];
             [self sendDidFailWithError:error];
 		}
 		return;
