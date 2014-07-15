@@ -49,7 +49,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Facebook' do |facebook|
     facebook.source_files   = 'Classes/ShareKit/Sharers/Services/Facebook/**/*.{h,m}'
-    facebook.dependency 'Facebook-iOS-SDK'
+    facebook.vendored_frameworks = 'Frameworks/FacebookSDK.framework'
     facebook.dependency 'ShareKit/Core'
   end
 
