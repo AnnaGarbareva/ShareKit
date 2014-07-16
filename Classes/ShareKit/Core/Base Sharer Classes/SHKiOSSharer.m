@@ -148,6 +148,7 @@
         switch (error.code) {
             case ACErrorAccountNotFound: //code ACErrorAccountNotFound means user account not exists in settings.app
                 [self authDidFinishWithError:[self newErrorWhenAccountNotFound]];
+                [self askUserForAccount];
                 break;
             case ACErrorAccessInfoInvalid:
                 NSAssert(NO, @"Missing %@ app id - set it in your configurator", [self sharerTitle]);
@@ -160,6 +161,16 @@
     SHKLog(@"auth failed:%@", [error description]);
 
     [[self class] logout];
+}
+
+- (void)askUserForAccount
+{
+    SLComposeViewController *composeViewController = [SLComposeViewController composeViewControllerForServiceType:self.serviceTypeIdentifier];
+
+    [[[SHK currentHelper] rootViewForUIDisplay] presentViewController:composeViewController animated:NO completion:^{
+        [composeViewController dismissViewControllerAnimated:NO completion:nil];
+    }];
+
 }
 
 - (void)iOSAuthorizationFinished
