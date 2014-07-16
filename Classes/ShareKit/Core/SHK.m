@@ -64,9 +64,9 @@ const NSInteger SHKErrorCodeInvalidInput = 103;
 const NSInteger SHKErrorCodeAccountNotFound = 104;
 const NSInteger SHKErrorCodeUnknown = 105;
 
-static NSString * const SHKErrorDomain = @"com.sharekit";
+NSString * const SHKErrorDomain = @"com.sharekit";
 
-static NSString * const SHKErrorTitleKey = @"errorTitle";
+NSString * const SHKErrorTitleKey = @"errorTitle";
 
 @interface SHK ()
 
