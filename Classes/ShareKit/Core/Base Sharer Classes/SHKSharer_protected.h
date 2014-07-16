@@ -95,6 +95,10 @@ typedef enum
 
 - (void)shortenURL;
 
+#pragma mark - Offline handling
+
+- (void)doIfOnline:(void(^)())onlineBlock orFail:(void(^)())failBlock;
+
 #pragma mark -
 #pragma mark Authentication
 
@@ -163,6 +167,7 @@ typedef enum
 - (void)sendDidFailWithError:(NSError *)error;
 - (void)sendDidFailWithError:(NSError *)error shouldRelogin:(BOOL)shouldRelogin;
 - (void)sendDidCancel;
+- (void)sendDidOfflineFail;
 /*  centralized error reporting */
 - (void)authShowBadCredentialsAlert;
 - (void)authShowOtherAuthorizationErrorAlert;

@@ -493,19 +493,33 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 	return NO;
 }
 
+- (void)doIfOnline:(void(^)())onlineBlock orFail:(void(^)())failBlock
+{
+    if ([[self class] shareRequiresInternetConnection] && ![SHK connected])
+    {
+        if (failBlock) {
+            failBlock();
+        }
+    } else {
+        if (onlineBlock) {
+            onlineBlock();
+        }
+    }
+}
+
+- (void)sendDidOfflineFail
+{
+    NSError *error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])}];
+    [self sendDidFailWithError:error];
+}
+
 - (void)promptAuthorization
 {
-	if ([[self class] shareRequiresInternetConnection] && ![SHK connected])
-	{
-		if (!self.quiet)
-		{
-            NSError *error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"You must be online to login to %@", [self sharerTitle])}];
-            [self sendDidFailWithError:error];
-		}
-		return;
-	}
-	
-	[self authorizationFormShow];
+    [self doIfOnline:^{
+        [self authorizationFormShow];
+    } orFail:^{
+        [self sendDidOfflineFail];
+    }];
 }
 
 - (NSString *)getAuthValueForKey:(NSString *)key

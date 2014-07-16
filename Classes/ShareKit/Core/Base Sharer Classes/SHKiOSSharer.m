@@ -38,15 +38,19 @@
 
 #pragma mark - UI
 
-- (void)show {
+- (void)show
+{
+    [self doIfOnline:^{
+        if ([SHKCONFIG(useAppleShareUI) boolValue]) {
 
-    if ([SHKCONFIG(useAppleShareUI) boolValue]) {
-        
-        BOOL nativeUISuccessful = [self shareWithServiceType:[self serviceTypeIdentifier]];
-        if (nativeUISuccessful) return; //shared via iOS native UI
-    }
-    
-    [super show];
+            BOOL nativeUISuccessful = [self shareWithServiceType:[self serviceTypeIdentifier]];
+            if (nativeUISuccessful) return; //shared via iOS native UI
+        }
+
+        [super show];
+    } orFail:^{
+        [self sendDidOfflineFail];
+    }];
 }
 
 - (BOOL)shareWithServiceType:(NSString *)serviceType {
