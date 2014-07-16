@@ -81,3 +81,7 @@
 
 "Access Error" = "Ошибка доступа";
 "There was an error while sharing" = "Произошла ошибка при oтправке";
+
+"No Access" = "Нет доступа";
+"There are no %@ accounts configured. You can add or create a %@ account in Settings." = "Не настроен аккаунт для %@. Вы можете настроить %@ аккаунт в настройках системы.";
+"Access to %@ is not allowed for this app. You can allow access in Settings." = "Не доступа к %@ из приложения. Вы можете настроить доступ в настройках системы.";
