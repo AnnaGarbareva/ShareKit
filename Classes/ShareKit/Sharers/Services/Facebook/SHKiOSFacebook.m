@@ -48,6 +48,15 @@ typedef void (^SHKRequestHandler)(NSData *responseData, NSURLResponse *urlRespon
 
 #pragma mark - Authorization
 
+- (BOOL)isAuthorized
+{
+    if ([SHKCONFIG(useAppleShareUI) boolValue]) {
+        return YES;
+    } else {
+        return [super isAuthorized];
+    }
+}
+
 - (void)authorizationFormShow {
     
     ACAccountStore *store = [[ACAccountStore alloc] init];
