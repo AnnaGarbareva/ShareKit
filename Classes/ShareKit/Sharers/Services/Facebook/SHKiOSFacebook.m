@@ -92,11 +92,10 @@ typedef void (^SHKRequestHandler)(NSData *responseData, NSURLResponse *urlRespon
                                                                                 completion:^(BOOL writeGranted, NSError *error) {
                                                                                     
                                                                                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                                                                                        
-                                                                                        [self authDidFinish:writeGranted];
-                                                                                        
+
                                                                                         if (writeGranted) {
                                                                                             [self tryPendingAction];
+                                                                                            [self iOSAuthorizationFinished];
                                                                                         } else {
                                                                                             [self iOSAuthorizationFailedWithError:error];
                                                                                         }
@@ -106,7 +105,6 @@ typedef void (^SHKRequestHandler)(NSData *responseData, NSURLResponse *urlRespon
                                                     
                                                     [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
                                                         [self iOSAuthorizationFailedWithError:error];
-                                                        [self authDidFinish:NO];
                                                     }];
                                                 }
                                         }];

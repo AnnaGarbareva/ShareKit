@@ -37,7 +37,7 @@
 - (void)displayCompleted:(NSString *)completionText forSharer:(SHKSharer *)sharer;
 - (void)showProgress:(CGFloat)progress forSharer:(SHKSharer *)sharer;
 @optional
-- (void)sharerAuthDidFinish:(SHKSharer *)sharer success:(BOOL)success;	
+- (void)sharerAuthDidFinish:(SHKSharer *)sharer error:(NSError *)error;
 
 @end
 

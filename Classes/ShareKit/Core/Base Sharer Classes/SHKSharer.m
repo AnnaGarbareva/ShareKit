@@ -164,7 +164,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 }
 
 - (BOOL)shouldAutoShare
-{	
+{
 	return [[NSUserDefaults standardUserDefaults] boolForKey:[NSString stringWithFormat:@"%@_shouldAutoShare", [self sharerId]]];
 }
 
@@ -682,7 +682,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
                       header:nil
                       footer:SHKLocalizedString(@"Enable auto share to skip this step in the future.")];
     }
-    
+
     rootView.validateBlock = [self shareFormValidate];
     rootView.saveBlock = [self shareFormSave];
     rootView.cancelBlock = [self shareFormCancel];
@@ -694,38 +694,38 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 - (NSArray *)shareFormFieldsForType:(SHKShareType)type
 {
 	//this is abstract method. Services which do not present their own UI should override this to present SHKFormController e.g like this
-    
+
     /*	if (type == SHKShareTypeURL)
      return [NSArray arrayWithObjects:
      [SHKFormFieldSettings label:SHKLocalizedString(@"Title") key:@"title" type:SHKFormFieldTypeText start:self.item.title],
      nil];*/
-    
+
     return nil;
 }
 
 - (FormControllerCallback)shareFormValidate
-{	
+{
     FormControllerCallback result = ^(SHKFormController *form) {
-        
+
         /*
-         
+
          Services should subclass this if they need to validate any data before sending.
          You can get a dictionary of the field values from [form formValues]
-         
+
          --
-         
+
          You should perform one of the following actions:
-         
+
          1.	Display an error - If the user input was incorrect, display an error to the user and tell them what to do to fix it
-         
+
          2.	Save the form - If everything is correct call [form save]
-         
+
          3.	Display a pending indicator - If you need to authorize the details on the server, display an activity indicator with [form displayActivity:@"DESCRIPTION OF WHAT YOU ARE DOING"]
          After your process completes be sure to perform either 1 or 2 above.
-         
+
          */
-        
-        
+
+
         // default does no checking and proceeds to share
         [form saveForm];
     };
@@ -733,12 +733,12 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 }
 
 - (FormControllerCallback)shareFormSave
-{		
+{
     __weak typeof(self) weakSelf = self;
     FormControllerCallback result = ^(SHKFormController *form) {
-        
+
         [weakSelf updateItemWithForm:form];
-        
+
         // Update shouldAutoShare
         if ([SHKCONFIG(allowAutoShare) boolValue] == TRUE && [[weakSelf class] canAutoShare])
         {
@@ -746,7 +746,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
             if ([advancedOptions objectForKey:@"autoShare"] != nil)
                 [weakSelf setShouldAutoShare:[[advancedOptions objectForKey:@"autoShare"] isEqualToString:SHKFormFieldSwitchOn]];
         }
-        
+
         // Send the share
         [weakSelf tryToSend];
     };
@@ -757,7 +757,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 {
 	__weak typeof(self) weakSelf = self;
     FormControllerCallback result = ^(SHKFormController *form) {
-        
+
         [weakSelf sendDidCancel];
     };
     return result;
@@ -766,7 +766,7 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 #pragma mark -
 
 - (NSString *)tagStringJoinedBy:(NSString *)joinString allowedCharacters:(NSCharacterSet *)charset tagPrefix:(NSString *)prefixString tagSuffix:(NSString *)suffixString {
-    
+
     NSMutableArray *cleanedTags = [NSMutableArray arrayWithCapacity:[self.item.tags count]];
     NSCharacterSet *removeSet = [charset invertedSet];
     
@@ -836,16 +836,16 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
 	{
 		case SHKShareTypeURL:
 			return (self.item.URL != nil);
-			
+
 		case SHKShareTypeImage:
 			return (self.item.image != nil);
-			
+
 		case SHKShareTypeText:
 			return (self.item.text != nil);
-			
+
 		case SHKShareTypeFile:
 			return (self.item.file != nil);
-            
+
         case SHKShareTypeUserInfo:
             return [[self class] canGetUserInfo];
 		default:
@@ -997,17 +997,36 @@ static NSString *const kSHKStoredShareInfoKey=@"kSHKStoredShareInfo";
     
     [[NSNotificationCenter defaultCenter] postNotificationName:SHKSendDidCancelNotification object:self];
     
-    if ([self.shareDelegate respondsToSelector:@selector(sharerCancelledSending:)])
-		[self.shareDelegate performSelector:@selector(sharerCancelledSending:) withObject:self];	
+    if ([self.shareDelegate respondsToSelector:@selector(sharerCancelledSending:)]) {
+        [self.shareDelegate performSelector:@selector(sharerCancelledSending:) withObject:self];
+    }
 }
 
-- (void)authDidFinish:(BOOL)success	
+- (void)authDidFinish:(BOOL)success
 {
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:SHKAuthDidFinishNotification object:self userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:success] forKey:@"success"]];
-    
-    if ([self.shareDelegate respondsToSelector:@selector(sharerAuthDidFinish:success:)]) {		
-        [self.shareDelegate sharerAuthDidFinish:self success:success];
+    NSError *error = nil;
+
+    if (!success) {
+        NSMutableDictionary *userInfo = [NSMutableDictionary new];
+        userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"There was an error while authorizing");
+        userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"Authorize Error");
+        error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:userInfo];
+    }
+
+    [self authDidFinishWithError:error];
+}
+
+- (void)authDidFinishWithError:(NSError *)error
+{
+    NSMutableDictionary *notificationPayload = [NSMutableDictionary new];
+    notificationPayload[@"success"] = @(error == nil);
+    if (error) {
+        notificationPayload[@"error"] = error;
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:SHKAuthDidFinishNotification object:self userInfo:notificationPayload];
+
+    if ([self.shareDelegate respondsToSelector:@selector(sharerAuthDidFinish:error:)]) {
+        [self.shareDelegate sharerAuthDidFinish:self error:error];
     }
 }
 

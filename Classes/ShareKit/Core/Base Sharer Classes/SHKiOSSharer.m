@@ -138,12 +138,12 @@
 - (void)iOSAuthorizationFailedWithError:(NSError *)error {
     
     if (!error) {
-        [self sendDidFailWithError:[self newErrorWhenRevokedAccess]];
+        [self authDidFinishWithError:[self newErrorWhenRevokedAccess]];
     } else if ([error.domain isEqualToString:ACErrorDomain]){
 
         switch (error.code) {
             case ACErrorAccountNotFound: //code ACErrorAccountNotFound means user account not exists in settings.app
-                [self sendDidFailWithError:[self newErrorWhenAccountNotFound]];
+                [self authDidFinishWithError:[self newErrorWhenAccountNotFound]];
                 break;
             case ACErrorAccessInfoInvalid:
                 NSAssert(NO, @"Missing %@ app id - set it in your configurator", [self sharerTitle]);
@@ -156,6 +156,11 @@
     SHKLog(@"auth failed:%@", [error description]);
 
     [[self class] logout];
+}
+
+- (void)iOSAuthorizationFinished
+{
+    [self authDidFinishWithError:nil];
 }
 
 #pragma mark - Authorization helpers

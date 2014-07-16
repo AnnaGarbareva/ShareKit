@@ -48,5 +48,6 @@
  */
 - (void)iOSAuthorizationFailedWithError:(NSError *)error;
 
+- (void)iOSAuthorizationFinished;
 
 @end

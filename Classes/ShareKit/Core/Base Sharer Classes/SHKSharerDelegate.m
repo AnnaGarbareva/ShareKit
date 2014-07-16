@@ -75,10 +75,10 @@
 
 }
 
-- (void)sharerAuthDidFinish:(SHKSharer *)sharer success:(BOOL)success
+- (void)sharerAuthDidFinish:(SHKSharer *)sharer error:(NSError *)error
 {
     //it is convenient to fetch user info after successful authorization. Not only you have username etc at your disposal, but there can be also various limits used by ShareKit to determine if the service can accept particular item (eg. video size) for this user. If it does not, ShareKit does not offer this service in share menu.
-    if (success){
+    if (!error){
         [[sharer class] getUserInfo];
     }
 }

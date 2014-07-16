@@ -69,8 +69,8 @@
     SHKVkontakte *sharer = [self delegate];
 
     if (error) {
-        if ([sharer.shareDelegate respondsToSelector:@selector(sharerAuthDidFinish:success:)]) {
-            [sharer.shareDelegate sharerAuthDidFinish:sharer success:NO];
+        if ([sharer.shareDelegate respondsToSelector:@selector(sharerAuthDidFinish:error:)]) {
+            [sharer.shareDelegate sharerAuthDidFinish:sharer error:error];
         }
     } else {
         [sharer authComplete];

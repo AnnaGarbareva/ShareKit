@@ -103,7 +103,8 @@
     self.isShareFinished = YES;
 }
 
-- (void)sharerAuthDidFinish:(SHKSharer *)sharer success:(BOOL)success { }
+- (void)sharerAuthDidFinish:(SHKSharer *)sharer error:(NSError *)error
+{ }
 - (void)sharerShowBadCredentialsAlert:(SHKSharer *)sharer { }
 - (void)sharerShowOtherAuthorizationErrorAlert:(SHKSharer *)sharer { }
 - (void)hideActivityIndicatorForSharer:(SHKSharer *)sharer { }

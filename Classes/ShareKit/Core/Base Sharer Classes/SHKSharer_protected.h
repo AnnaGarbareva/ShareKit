@@ -170,6 +170,7 @@ typedef enum
 /*	called when an auth request returns. This is helpful if you need to use a service somewhere else in your
  application other than sharing. It lets you use the same stored auth creds and login screens.
  */
-- (void)authDidFinish:(BOOL)success;
+- (void)authDidFinish:(BOOL)success DEPRECATED_ATTRIBUTE;
+- (void)authDidFinishWithError:(NSError *)error;
 
 @end
