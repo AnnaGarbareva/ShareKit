@@ -116,30 +116,20 @@
     return result;
 }
 
-- (BOOL)isSharerReady {
-    
-    if ([self availableAccounts].count > 0) {
-        return YES;
-    } else {
-        [self presentNoAvailableAccountAlert];
-        return NO;
-    }
-}
-
 - (void)authorizationFormShow {
     
     ACAccountType *sharerAccountType = [self.accountStore accountTypeWithAccountTypeIdentifier:[self accountTypeIdentifier]];
-    
+
     [self.accountStore requestAccessToAccountsWithType:sharerAccountType
                                    options:nil
                                 completion:^(BOOL granted, NSError *error) {
-                                    
+
                                     [self authDidFinish:granted];
-    
+
                                     if (granted) {
                                         [self tryPendingAction];
                                     } else {
-                                        [self iOSAuthorizationFailedWithError:error];                                        
+                                        [self iOSAuthorizationFailedWithError:error];
                                         [[self class] logout];
                                     }
                                 }];
@@ -148,17 +138,23 @@
 - (void)iOSAuthorizationFailedWithError:(NSError *)error {
     
     if (!error) {
-        [self presentRevokedAccessInSettingsAlert];
-    } else {
-        SHKLog(@"auth failed:%@", [error description]);
-        //code 6 means user account not exists in settings.app (at least for Facebook)
-        if ([error.domain isEqualToString:@"com.apple.accounts"] && error.code == 6) {
-            [self presentNoAvailableAccountAlert];
-        } else if ([error.domain isEqualToString:@"com.apple.accounts"] && error.code == 8) {
-            SHKLog(@"Missing Facebook app id - set it in your configurator");
+        [self sendDidFailWithError:[self newErrorWhenRevokedAccess]];
+    } else if ([error.domain isEqualToString:ACErrorDomain]){
+
+        switch (error.code) {
+            case ACErrorAccountNotFound: //code ACErrorAccountNotFound means user account not exists in settings.app
+                [self sendDidFailWithError:[self newErrorWhenAccountNotFound]];
+                break;
+            case ACErrorAccessInfoInvalid:
+                NSAssert(NO, @"Missing %@ app id - set it in your configurator", [self sharerTitle]);
+                break;
+            default:
+                //code 7 user just has not allowed access - no need to show alert. //what about other error codes?
+                break;
         }
-        //code 7 user just has not allowed access - no need to show alert.
     }
+    SHKLog(@"auth failed:%@", [error description]);
+
     [[self class] logout];
 }
 
@@ -171,40 +167,20 @@
     return result;
 }
 
-- (void)presentNoAvailableAccountAlert {
-    
-    SHKLog(@"User revoked access in settings.app, or in service itself.");
-    
-    if (self.quiet) return;
-    
-    dispatch_async(dispatch_get_main_queue(), ^ {
-        
-        NSString *alertTitle = SHKLocalizedString(@"No %@ Accounts", [[self class] sharerTitle]);
-        NSString *alertMessage = SHKLocalizedString(@"There are no %@ accounts configured. You can add or create a %@ account in Settings.", [[self class] sharerTitle], [[self class] sharerTitle]);
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:alertTitle
-                                                        message:alertMessage
-                                                       delegate:nil
-                                              cancelButtonTitle:SHKLocalizedString(@"Cancel")
-                                              otherButtonTitles:nil];
-        [alert show];
-    });
+- (NSError *)newErrorWhenAccountNotFound
+{
+    NSMutableDictionary *userInfo = [NSMutableDictionary new];
+    userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"No %@ Accounts", [[self class] sharerTitle]);
+    userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"There are no %@ accounts configured. You can add or create a %@ account in Settings.", [[self class] sharerTitle], [[self class] sharerTitle]);
+    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeAccessDenied userInfo:userInfo];
 }
 
-- (void)presentRevokedAccessInSettingsAlert {
-    
-    if (self.quiet) return;
-    
-    dispatch_async(dispatch_get_main_queue(), ^ {
-        
-        NSString *alertTitle = SHKLocalizedString(@"No Access", [[self class] sharerTitle]);
-        NSString *alertMessage = SHKLocalizedString(@"Access to %@ is not allowed for this app. You can allow access in Settings.", [[self class] sharerTitle]);
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:alertTitle
-                                                        message:alertMessage
-                                                       delegate:nil
-                                              cancelButtonTitle:SHKLocalizedString(@"Cancel")
-                                              otherButtonTitles:nil];
-        [alert show];
-    });
+- (NSError *)newErrorWhenRevokedAccess
+{
+    NSMutableDictionary *userInfo = [NSMutableDictionary new];
+    userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"No %@ Accounts", [[self class] sharerTitle]);
+    userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"Access to %@ is not allowed for this app. You can allow access in Settings.", [[self class] sharerTitle]);
+    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeAccessDenied userInfo:userInfo];
 }
 
 #pragma mark - MISC
