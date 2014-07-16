@@ -25,13 +25,13 @@
 #pragma mark - Abstract methods
 
 - (NSString *)accountTypeIdentifier {
-    
+
     NSAssert(NO, @"Abstract method. Must be subclassed!");
     return nil;
 }
 
 - (NSString *)serviceTypeIdentifier {
-    
+
     NSAssert(NO, @"Abstract method. Must be subclassed!");
     return nil;
 }
@@ -54,11 +54,11 @@
 }
 
 - (BOOL)shareWithServiceType:(NSString *)serviceType {
-    
+
     if (self.item.shareType == SHKShareTypeFile || self.item.shareType == SHKShareTypeUserInfo) return NO;
-    
+
     SLComposeViewController *sharerUIController = [SLComposeViewController composeViewControllerForServiceType:serviceType];
-    
+
     if (self.item.image) {
         BOOL addedImage = [sharerUIController addImage:self.item.image];
         if (!addedImage) return NO;
@@ -68,42 +68,42 @@
         BOOL addedURL = [sharerUIController addURL:self.item.URL];
         if (!addedURL) return NO;
     }
-    
+
     NSString *initialText = (self.item.shareType == SHKShareTypeText ? self.item.text : self.item.title);
-    
+
     NSString *tagString = [self joinedTags];
     if ([tagString length] > 0) initialText = [initialText stringByAppendingFormat:@" %@",tagString];
 
-        
+
     NSUInteger textLength = [initialText length];
-    
+
     while ([sharerUIController setInitialText:[initialText substringToIndex:textLength]] == NO && textLength > 0) {
         textLength--;
     }
-    
+
     sharerUIController.completionHandler = ^(SLComposeViewControllerResult result)
     {
-        
+
         if ([[UIApplication sharedApplication] isiOS6OrOlder]) {
             [[SHK currentHelper] hideCurrentViewControllerAnimated:YES];
         } else {
             [[SHK currentHelper] setCurrentView:nil];
         }
-        
+
         switch (result) {
-                
+
             case SLComposeViewControllerResultDone:
                 [self sendDidFinish];
                 break;
-                
+
             case SLComposeViewControllerResultCancelled:
                 [self sendDidCancel];
-                
+
             default:
                 break;
         }
     };
-    
+
     [[SHK currentHelper] showStandaloneViewController:sharerUIController];
     return YES;
 }
@@ -111,36 +111,35 @@
 #pragma mark - Authorization
 
 - (BOOL)isAuthorized {
-    
+
     ACAccountType *accountType = [self.accountStore accountTypeWithAccountTypeIdentifier:[self accountTypeIdentifier]];
     BOOL result = accountType.accessGranted;
-    
+
     if (!result) [[self class] logout]; //destroy userInfo
-    
+
     return result;
 }
 
 - (void)authorizationFormShow {
-    
+
     ACAccountType *sharerAccountType = [self.accountStore accountTypeWithAccountTypeIdentifier:[self accountTypeIdentifier]];
 
     [self.accountStore requestAccessToAccountsWithType:sharerAccountType
-                                   options:nil
-                                completion:^(BOOL granted, NSError *error) {
+                                               options:nil
+                                            completion:^(BOOL granted, NSError *error) {
 
-                                    [self authDidFinish:granted];
-
-                                    if (granted) {
-                                        [self tryPendingAction];
-                                    } else {
-                                        [self iOSAuthorizationFailedWithError:error];
-                                        [[self class] logout];
-                                    }
-                                }];
+        if (granted) {
+            [self iOSAuthorizationFinished];
+            [self tryPendingAction];
+        } else {
+            [self iOSAuthorizationFailedWithError:error];
+            [[self class] logout];
+        }
+    }];
 }
 
 - (void)iOSAuthorizationFailedWithError:(NSError *)error {
-    
+
     if (!error) {
         [self authDidFinishWithError:[self newErrorWhenRevokedAccess]];
     } else if ([error.domain isEqualToString:ACErrorDomain]){
@@ -165,12 +164,18 @@
 
 - (void)askUserForAccount
 {
-    SLComposeViewController *composeViewController = [SLComposeViewController composeViewControllerForServiceType:self.serviceTypeIdentifier];
-
-    [[[SHK currentHelper] rootViewForUIDisplay] presentViewController:composeViewController animated:NO completion:^{
-        [composeViewController dismissViewControllerAnimated:NO completion:nil];
-    }];
-
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIViewController *rootViewController = [[SHK currentHelper] rootViewForUIDisplay];
+        SLComposeViewController *composeViewController = [SLComposeViewController composeViewControllerForServiceType:self.serviceTypeIdentifier];
+        [rootViewController presentViewController:composeViewController animated:NO completion:^{
+            if ([self.serviceTypeIdentifier isEqualToString:SLServiceTypeFacebook]) {
+                [composeViewController dismissViewControllerAnimated:NO completion:nil];
+            } else {
+                [composeViewController.view endEditing:YES];
+                composeViewController.view.hidden = YES;
+            }
+        }];
+    });
 }
 
 - (void)iOSAuthorizationFinished
@@ -181,7 +186,7 @@
 #pragma mark - Authorization helpers
 
 - (NSArray *)availableAccounts {
-    
+
     ACAccountType *twitterAccountType = [self.accountStore accountTypeWithAccountTypeIdentifier:[self accountTypeIdentifier]];
     NSArray *result = [self.accountStore accountsWithAccountType:twitterAccountType];
     return result;
@@ -206,7 +211,7 @@
 #pragma mark - MISC
 
 - (NSString *)joinedTags {
-    
+
     return nil;
 }
 
