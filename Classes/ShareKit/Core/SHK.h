@@ -150,6 +150,7 @@ NSString * SHKLocalizedString(NSString* key, ...);
 const NSInteger SHKErrorCodeCancelled = 101;
 const NSInteger SHKErrorCodeAccessDenied = 102;
 const NSInteger SHKErrorCodeInvalidInput = 103;
+const NSInteger SHKErrorCodeAccountNotFound = 104;
 const NSInteger SHKErrorCodeUnknown = 105;
 
 static NSString * const SHKErrorDomain = @"com.sharekit";

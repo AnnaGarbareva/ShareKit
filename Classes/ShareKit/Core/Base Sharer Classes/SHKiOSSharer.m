@@ -192,7 +192,7 @@
     NSMutableDictionary *userInfo = [NSMutableDictionary new];
     userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"No %@ Accounts", [[self class] sharerTitle]);
     userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"There are no %@ accounts configured. You can add or create a %@ account in Settings.", [[self class] sharerTitle], [[self class] sharerTitle]);
-    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeAccessDenied userInfo:userInfo];
+    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeAccountNotFound userInfo:userInfo];
 }
 
 - (NSError *)newErrorWhenRevokedAccess
