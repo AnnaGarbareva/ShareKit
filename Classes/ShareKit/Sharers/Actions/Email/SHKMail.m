@@ -115,6 +115,8 @@
 	if (!mailController) {
 		// e.g. no mail account registered (will show alert)
 		[[SHK currentHelper] hideCurrentViewControllerAnimated:YES];
+        NSError *error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeAccountNotFound userInfo:@{ NSLocalizedDescriptionKey : @"You have to configure Mail app before sending emails."}];
+        [self authDidFinishWithError:error];
 		return YES;
 	}
 	
