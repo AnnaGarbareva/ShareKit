@@ -56,6 +56,26 @@ NSString * const SHKAttachmentSaveDir = @"SHKAttachmentSaveDir";
     return self;
 }
 
+- (SHKFile *)file
+{
+    SHKFile *result = nil;
+
+    if (_files && [_files count] > 0) {
+        result = _files[0];
+    }
+
+    return result;
+}
+
+- (void)setFile:(SHKFile *)file
+{
+    if (file) {
+        _files = @[file];
+    } else {
+        _files = nil;
+    }
+}
+
 - (void)setExtensionPropertiesDefaultValues {
     
     _printOutputType = [SHKCONFIG(printOutputType) intValue];

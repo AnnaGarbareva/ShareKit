@@ -127,43 +127,47 @@
 	NSString *body = self.item.text ? self.item.text : @"";
 	BOOL isHTML = self.item.isMailHTML;
     NSString *separator = (isHTML ? @"<br/><br/>" : @"\n\n");
-		
-		if (self.item.URL != nil)
-		{
-			NSString *urlStr = [self.item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-			
-            if ([body length] > 0) {
-                body = [body stringByAppendingFormat:@"%@%@", separator, urlStr];
-            } else {
-                body = [body stringByAppendingFormat:@"%@", urlStr];
-            }
-		}
-		
-		if (self.item.file)
-		{
-			NSString *attachedStr = SHKLocalizedString(@"Attached: %@", self.item.title ? self.item.title : self.item.file.filename);
-			
-            if ([body length] > 0) {
-                body = [body stringByAppendingFormat:@"%@%@", separator, attachedStr];
-            } else {
-                body = [body stringByAppendingFormat:@"%@", attachedStr];
-            }
-            		}
-		
-		// fallback
-		if (body == nil)
-			body = @"";
-		
-		// sig
-		if (self.item.mailShareWithAppSignature)
-		{
-			body = [body stringByAppendingString:separator];
-			body = [body stringByAppendingString:SHKLocalizedString(@"Sent from %@", SHKCONFIG(appName))];
-		}
-	
-	if (self.item.file)
-		[mailController addAttachmentData:self.item.file.data mimeType:self.item.file.mimeType fileName:self.item.file.filename];
-	
+
+    if (self.item.URL != nil) {
+        NSString *urlStr = [self.item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+
+        if ([body length] > 0) {
+            body = [body stringByAppendingFormat:@"%@%@", separator, urlStr];
+        } else {
+            body = [body stringByAppendingFormat:@"%@", urlStr];
+        }
+    }
+
+    if ([self.item.files count] > 0) {
+
+        NSString *attachedStr = SHKLocalizedString(@"Attached: %@", @"");
+
+        BOOL isFirst = YES;
+        for (SHKFile *file in self.item.files) {
+            attachedStr = [attachedStr stringByAppendingFormat:@"%@%@",isFirst?@"",@", ",file.filename];
+            isFirst = NO;
+        }
+
+        if ([body length] > 0) {
+            body = [body stringByAppendingFormat:@"%@", separator];
+        }
+        body = [body stringByAppendingString:attachedStr];
+    }
+
+    // fallback
+    if (body == nil)
+        body = @"";
+
+    // sig
+    if (self.item.mailShareWithAppSignature) {
+        body = [body stringByAppendingString:separator];
+        body = [body stringByAppendingString:SHKLocalizedString(@"Sent from %@", SHKCONFIG(appName))];
+    }
+
+    for (SHKFile *file in self.item.files) {
+        [mailController addAttachmentData:file.data mimeType:file.mimeType fileName:file.filename];
+    }
+
 	NSArray *toRecipients = self.item.mailToRecipients;
     if (toRecipients)
 		[mailController setToRecipients:toRecipients];

@@ -85,7 +85,8 @@ typedef enum
 
 @property (nonatomic, strong) UIImage *image;
 
-@property (nonatomic, strong) SHKFile *file;
+@property (nonatomic, strong) SHKFile *file; /** File is shortcut for files = @[file] */
+@property (nonatomic, strong) NSArray *files;
 
 /*** creation methods ***/
 
