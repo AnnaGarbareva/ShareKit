@@ -237,11 +237,13 @@
                                                 if (error) {
                                                     
                                                     if (error.fberrorCategory == FBErrorCategoryUserCancelled) {
-                                                        
+
                                                         [self sendDidCancel];
                                                         return;
                                                         
                                                     } else if (error.fberrorShouldNotifyUser){
+
+
                                                         
                                                         UIAlertView *alertView = [[UIAlertView alloc]
                                                                                   initWithTitle:@"Error"
@@ -304,7 +306,6 @@
             if (error){
                 [self hideActivityIndicator];
                 [self sendDidFailWithError:error];
-                [self sendDidFinish];
                 return;
             }
             

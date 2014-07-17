@@ -124,34 +124,17 @@
 - (void)tokenAuthorizeView:(SHKOAuthView *)authView didFinishWithSuccess:(BOOL)success queryParams:(NSMutableDictionary *)queryParams error:(NSError *)error;
 {
 	[[SHK currentHelper] hideCurrentViewControllerAnimated:YES];
-	
-	if (!success)
-	{
-		[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Authorize Error")
-									 message:error!=nil?[error localizedDescription]:SHKLocalizedString(@"There was an error while authorizing")
-									delegate:nil
-						   cancelButtonTitle:SHKLocalizedString(@"Close")
-						   otherButtonTitles:nil] show];
-		[self authDidFinish:success];
-	}	
-	
-	else if ([queryParams objectForKey:@"oauth_problem"])
-	{
-		SHKLog(@"oauth_problem reported: %@", [queryParams objectForKey:@"oauth_problem"]);
 
-		[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Authorize Error")
-									 message:error!=nil?[error localizedDescription]:SHKLocalizedString(@"There was an error while authorizing")
-									delegate:nil
-						   cancelButtonTitle:SHKLocalizedString(@"Close")
-						   otherButtonTitles:nil] show];
-		success = NO;
-		[self authDidFinish:success];
+	if (!success) {
+        [self authDidFinishWithError:[self newErrorWhenReason:nil originalError:error]];
 	}
-
-	else 
-	{
+	else if ([queryParams objectForKey:@"oauth_problem"]) {
+        NSString *reason = [queryParams objectForKey:@"oauth_problem"];
+        [self authDidFinishWithError:[self newErrorWhenReason:reason originalError:error]];
+        SHKLog(@"oauth_problem reported: %@", reason);
+    }
+	else  {
 		self.authorizeResponseQueryVars = queryParams;
-		
 		[self tokenAccess];
 	}
 }
@@ -159,7 +142,7 @@
 - (void)tokenAuthorizeCancelledView:(SHKOAuthView *)authView
 {
 	[[SHK currentHelper] hideCurrentViewControllerAnimated:YES];
-	[self authDidFinish:NO];
+    [self authDidFinishWithError:[self newErrorWhenAuthCancelled]];
 }
 
 
@@ -203,9 +186,10 @@
 		SHKLog(@"tokenAccessTicket Response Body: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
 	
 	[self hideActivityIndicator];
-	
-	if (ticket.didSucceed) 
-	{
+
+    NSError *error = nil;
+
+	if (ticket.didSucceed) {
 		NSString *responseBody = [[NSString alloc] initWithData:data
 													   encoding:NSUTF8StringEncoding];
 		OAToken *aAccesToken = [[OAToken alloc] initWithHTTPResponseBody:responseBody];
@@ -214,14 +198,11 @@
 		[self storeAccessToken];
 		
 		[self tryPendingAction];
-	}
-	
-	
-	else
-		// TODO - better error handling here
-		[self tokenAccessTicket:ticket didFailWithError:[SHK error:SHKLocalizedString(@"There was a problem requesting access from %@", [self sharerTitle])]];
+	} else {
+        error = [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:@{NSLocalizedDescriptionKey:SHKLocalizedString(@"There was a problem requesting access from %@", [self sharerTitle])}];
+    }
 
-	[self authDidFinish:ticket.didSucceed];
+    [self authDidFinishWithError:error];
 }
 
 - (void)tokenAccessTicket:(OAServiceTicket *)ticket didFailWithError:(NSError*)error
@@ -234,7 +215,7 @@
         error = [NSError errorWithDomain:error.domain code:error.code userInfo:userInfo];
     }
     
-    [self sendDidFailWithError:error];
+    [self authDidFinishWithError:error];
 }
 
 - (void)storeAccessToken
@@ -310,6 +291,27 @@
 {
 	self.pendingAction = SHKPendingRefreshToken;
 	[self tokenAccess:YES];
+}
+
+#pragma mark - Errors
+
+- (NSError *)newErrorWhenReason:(NSString *)reason originalError:(NSError *)error
+{
+    NSMutableDictionary *userInfo = [NSMutableDictionary new];
+    userInfo[NSLocalizedDescriptionKey] = error ? error.localizedDescription : SHKLocalizedString(@"There was an error while authorizing");
+    userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"Authorize Error");
+    if (reason) {
+        userInfo[NSLocalizedFailureReasonErrorKey] = reason;
+    }
+    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeUnknown userInfo:userInfo];
+}
+
+- (NSError *)newErrorWhenAuthCancelled
+{
+    NSMutableDictionary *userInfo = [NSMutableDictionary new];
+    userInfo[NSLocalizedDescriptionKey] = SHKLocalizedString(@"Auth cancelled");
+    userInfo[SHKErrorTitleKey] = SHKLocalizedString(@"Authorize Error");
+    return [NSError errorWithDomain:SHKErrorDomain code:SHKErrorCodeCancelled userInfo:userInfo];
 }
 
 @end
