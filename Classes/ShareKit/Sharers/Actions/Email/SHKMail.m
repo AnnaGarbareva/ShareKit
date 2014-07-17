@@ -144,7 +144,7 @@
 
         BOOL isFirst = YES;
         for (SHKFile *file in self.item.files) {
-            attachedStr = [attachedStr stringByAppendingFormat:@"%@%@",isFirst?@"",@", ",file.filename];
+            attachedStr = [attachedStr stringByAppendingFormat:@"%@%@",isFirst?@"":@", ",file.filename];
             isFirst = NO;
         }
 
