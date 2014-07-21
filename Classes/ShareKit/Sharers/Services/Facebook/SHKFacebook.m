@@ -93,6 +93,16 @@ static SHKFacebook *lastAuthorizatingFacebook;
                          sourceApplication:sourceApplication
                                withSession:[FBSession activeSession]];
 
+    NSLog(@"URL from facebook: %@",url);
+
+    NSError *error = [self errorFromUrl:url];
+
+    if (error) {
+        [currentSharer authDidFinishWithError:error];
+        return result;
+    }
+
+
     NSRange rangeOfWritePermissions = [[url absoluteString] rangeOfString:SHKCONFIG(facebookWritePermissions)[0]];
     BOOL gotReadPermissionsOnly =  rangeOfWritePermissions.location == NSNotFound;
     if (gotReadPermissionsOnly) {
@@ -119,16 +129,6 @@ static SHKFacebook *lastAuthorizatingFacebook;
     } else {
         //I do not know why, but this completion handler is never called - instead the one provided during requestNewPublishPermissions: within send method is. This has a consequence, that if the app gets killed before the SSO trip to Safari/Facebook.app returns, the share does not continue after getting write permissions. The reason is that the block does not exist anymore.
         [FBSession openActiveSessionWithPublishPermissions:SHKCONFIG(facebookWritePermissions) defaultAudience:FBSessionDefaultAudienceFriends allowLoginUI:NO completionHandler:nil];
-    }
-
-    NSLog(@"URL from facebook: %@",url);
-
-    NSError *error = [self errorFromUrl:url];
-
-    if (error) {
-        [currentSharer authDidFinishWithError:error];
-    }
-    else {
         [currentSharer authDidFinishWithError:nil];
         [currentSharer share];
     }
@@ -223,7 +223,17 @@ static SHKFacebook *lastAuthorizatingFacebook;
 {
     [self saveItemForLater:self.pendingAction];
 
-    FBSession *authSession = [[FBSession alloc] initWithPermissions:SHKCONFIG(facebookReadPermissions)];
+    NSMutableArray *permissions = [NSMutableArray new];
+    NSArray *read = SHKCONFIG(facebookReadPermissions);
+    if (read) {
+        [permissions addObjectsFromArray:read];
+    }
+    NSArray *write = SHKCONFIG(facebookWritePermissions);
+    if (write) {
+        [permissions addObjectsFromArray:write];
+    }
+
+    FBSession *authSession = [[FBSession alloc] initWithPermissions:permissions];
     //completion happens within class method handleOpenURL:sourceApplication, thus nil handler here
     [authSession openWithCompletionHandler:nil];
 
@@ -318,6 +328,7 @@ static SHKFacebook *lastAuthorizatingFacebook;
 
     if (self.item.shareType == SHKShareTypeURL || self.item.shareType == SHKShareTypeText)
     {
+        NSLog(@"Do Send!! %@",self);
         [FBRequestConnection startWithGraphPath:@"me/feed"
                                      parameters:params
                                      HTTPMethod:@"POST" completionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
