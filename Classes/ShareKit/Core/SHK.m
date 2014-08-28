@@ -226,6 +226,9 @@ BOOL SHKinit;
     [(UINavigationController *)vc navigationBar].tintColor = SHKCONFIG_WITH_ARGUMENT(barTintForView:,vc);
     
     [self presentVC:vc];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+        [[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleDefault];
+    }
 }
 
 /* method for sharers with custom UI, e.g. all social.framework sharers, print etc */
@@ -273,6 +276,9 @@ BOOL SHKinit;
 - (void)hideCurrentViewController
 {
 	[self hideCurrentViewControllerAnimated:YES];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+        [[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleLightContent];
+    }
 }
 
 - (void)hideCurrentViewControllerAnimated:(BOOL)animated
