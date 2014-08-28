@@ -111,7 +111,7 @@
     }
     
     if (self.item.title) {
-        body = [self appendText:self.item.title toBody:body];
+        //body = [self appendText:self.item.title toBody:body];
     }
     
     // fallback
@@ -143,7 +143,7 @@
     
     NSString *result = nil;
     if (body) {
-        result = [body stringByAppendingFormat:@"<br/><br/>%@", string];
+        result = body;//[body stringByAppendingFormat:@"<br/><br/>%@", string];
     } else {
         result = string;
     }
