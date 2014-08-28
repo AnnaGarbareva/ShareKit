@@ -60,12 +60,12 @@
 "Open in Safari" = "Открыть в Safari";
 "Attached: %@" = "Прикреплено: %@";
 
-"You must be online to login to %@" = "Вы должны быть подключены к Интернет чтобы войти на %@";
+"You must be online to login to %@" = "Вы должны быть подключены к Интернету, чтобы войти в %@";
 
 "Auto Share" = "Авто-отправка";
 "Enable auto share to skip this step in the future." = "Включите авто-отправку, чтобы пропустить это шаг в дальнейшем.";
 
-"You must be online in order to share with %@" = "Вы должны быть подключены к Интернет чтобы слать на %@";
+"You must be online in order to share with %@" = "Вы должны быть подключены к Интернету, чтобы отправлять сообщения в %@";
 "There was an error while sharing" = "Произошла ошибка при oтправке";
 
 "Could not authenticate you. Please relogin." = "Невозможно Вас аутентифицировать. Пожалуйста, войдите еще раз.";
